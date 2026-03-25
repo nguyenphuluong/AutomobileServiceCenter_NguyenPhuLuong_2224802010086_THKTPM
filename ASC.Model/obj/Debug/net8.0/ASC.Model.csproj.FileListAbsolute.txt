@@ -1,0 +1,13 @@
+C:\Users\nguye\source\repos\AutomobileServiceCenter_NguyenPhuLuong\ASC.Model\bin\Debug\net8.0\ASC.Model.deps.json
+C:\Users\nguye\source\repos\AutomobileServiceCenter_NguyenPhuLuong\ASC.Model\bin\Debug\net8.0\ASC.Model.dll
+C:\Users\nguye\source\repos\AutomobileServiceCenter_NguyenPhuLuong\ASC.Model\bin\Debug\net8.0\ASC.Model.pdb
+C:\Users\nguye\source\repos\AutomobileServiceCenter_NguyenPhuLuong\ASC.Model\obj\Debug\net8.0\ASC.Model.csproj.AssemblyReference.cache
+C:\Users\nguye\source\repos\AutomobileServiceCenter_NguyenPhuLuong\ASC.Model\obj\Debug\net8.0\ASC.Model.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\nguye\source\repos\AutomobileServiceCenter_NguyenPhuLuong\ASC.Model\obj\Debug\net8.0\ASC.Model.AssemblyInfoInputs.cache
+C:\Users\nguye\source\repos\AutomobileServiceCenter_NguyenPhuLuong\ASC.Model\obj\Debug\net8.0\ASC.Model.AssemblyInfo.cs
+C:\Users\nguye\source\repos\AutomobileServiceCenter_NguyenPhuLuong\ASC.Model\obj\Debug\net8.0\ASC.Model.csproj.CoreCompileInputs.cache
+C:\Users\nguye\source\repos\AutomobileServiceCenter_NguyenPhuLuong\ASC.Model\obj\Debug\net8.0\ASC.Model.sourcelink.json
+C:\Users\nguye\source\repos\AutomobileServiceCenter_NguyenPhuLuong\ASC.Model\obj\Debug\net8.0\ASC.Model.dll
+C:\Users\nguye\source\repos\AutomobileServiceCenter_NguyenPhuLuong\ASC.Model\obj\Debug\net8.0\refint\ASC.Model.dll
+C:\Users\nguye\source\repos\AutomobileServiceCenter_NguyenPhuLuong\ASC.Model\obj\Debug\net8.0\ASC.Model.pdb
+C:\Users\nguye\source\repos\AutomobileServiceCenter_NguyenPhuLuong\ASC.Model\obj\Debug\net8.0\ref\ASC.Model.dll
