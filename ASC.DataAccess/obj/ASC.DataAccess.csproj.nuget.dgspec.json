@@ -200,6 +200,10 @@
         "net8.0": {
           "targetAlias": "net8.0",
           "dependencies": {
+            "Microsoft.AspNetCore.Session": {
+              "target": "Package",
+              "version": "[2.3.9, )"
+            },
             "Newtonsoft.Json": {
               "target": "Package",
               "version": "[13.0.5-beta1, )"
