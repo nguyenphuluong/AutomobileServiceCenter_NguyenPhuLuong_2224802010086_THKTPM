@@ -1,6 +1,6 @@
-/* Removes padding */
+﻿/* Removes padding */
 .padding-0px {
-    padding: 0px !important;
+    padding: 0 !important;
 }
 
 /* Make logo fit in the header */
@@ -13,6 +13,7 @@
         height: 50px;
     }
 }
+
 /* Adjusting padding to display Side Nav */
 header.secureLayout,
 main.secureLayout,
@@ -29,10 +30,151 @@ footer.secureLayout {
 }
 
 /* Selected Menu Item style */
-.side-nav li.active {
+.side-nav li.active,
+.sidenav li.active {
     background-color: #f5f5f5;
 }
 
 .margin-bottom-0px {
-    margin-bottom: 0px;
+    margin-bottom: 0;
+}
+
+.input-validation-error {
+    border-bottom: 1px solid #FF4081 !important;
+    box-shadow: 0 1px 0 0 #FF4081 !important;
+}
+
+.input-valid {
+    border-bottom: 1px solid #00E676 !important;
+    box-shadow: 0 1px 0 0 #00E676 !important;
+}
+
+.validation-summary-errors {
+    color: #FF4081;
+}
+
+/* =========================
+   CUSTOM SIDENAV
+   ========================= */
+
+.custom-sidenav {
+    width: 300px;
+}
+
+    /* bỏ khoảng thừa của list */
+    .custom-sidenav li {
+        margin: 0;
+        padding: 0;
+    }
+
+    /* menu cha thường */
+    .custom-sidenav > li > a.menu-link {
+        display: flex !important;
+        align-items: center !important;
+        gap: 16px;
+        min-height: 54px;
+        padding: 0 24px !important;
+        line-height: 1.2 !important;
+        box-sizing: border-box;
+    }
+
+    /* menu cha có menu con */
+    .custom-sidenav > li > .custom-collapsible > li > a.collapsible-header.menu-link,
+    .custom-sidenav > li > ul.collapsible > li > a.collapsible-header.menu-link {
+        display: flex !important;
+        align-items: center !important;
+        gap: 16px;
+        min-height: 54px;
+        padding: 0 24px !important;
+        line-height: 1.2 !important;
+        box-sizing: border-box;
+    }
+
+    /* menu con */
+    .custom-sidenav .collapsible-body ul li a.child-link {
+        display: flex !important;
+        align-items: center !important;
+        gap: 16px;
+        min-height: 50px;
+        padding: 0 24px 0 64px !important;
+        line-height: 1.2 !important;
+        box-sizing: border-box;
+        font-size: 15px;
+    }
+
+    /* icon */
+    .custom-sidenav .menu-icon {
+        float: none !important;
+        margin: 0 !important;
+        width: 24px !important;
+        min-width: 24px !important;
+        height: 24px !important;
+        line-height: 24px !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        font-size: 24px !important;
+    }
+
+    /* text */
+    .custom-sidenav .menu-text {
+        display: block;
+        margin: 0 !important;
+        line-height: 1.2 !important;
+        flex: 1;
+    }
+
+    /* phần collapsible */
+    .custom-sidenav .collapsible,
+    .custom-sidenav .collapsible li,
+    .custom-sidenav .custom-collapsible,
+    .custom-sidenav .custom-collapsible li {
+        margin: 0 !important;
+        border: none !important;
+        box-shadow: none !important;
+    }
+
+    .custom-sidenav .collapsible-header {
+        border: none !important;
+    }
+
+    .custom-sidenav .collapsible-body {
+        border: none !important;
+        background-color: #fafafa;
+    }
+
+        .custom-sidenav .collapsible-body ul {
+            margin: 0;
+            padding: 0;
+        }
+
+    /* hover */
+    .custom-sidenav a.menu-link:hover,
+    .custom-sidenav .collapsible-header:hover,
+    .custom-sidenav .child-link:hover {
+        background-color: #f5f5f5 !important;
+    }
+
+/* user view nếu có */
+.custom-user-view .name,
+.custom-user-view .email {
+    display: block;
+}
+html, body {
+    height: 100%;
+    margin: 0;
+}
+
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+main {
+    flex: 1 0 auto;
+}
+
+footer {
+    margin-top: auto;
 }

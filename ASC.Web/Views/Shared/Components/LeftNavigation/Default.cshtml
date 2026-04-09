@@ -1,0 +1,110 @@
+﻿@model ASC.Web.Models.NavigationMenu
+@using ASC.Utilities
+@inject IHttpContextAccessor UserHttpContext
+
+@{
+    var sessionUser = UserHttpContext.HttpContext?.Session.GetSession<CurrentUser>("CurrentUser");
+    var claimUser = UserHttpContext.HttpContext?.User.GetCurrentUserDetails();
+    var currentUser = sessionUser ?? claimUser;
+
+    var currentRole = (currentUser?.Roles != null && currentUser.Roles.Length > 0)
+        ? currentUser.Roles[0]
+        : "User";
+
+    var currentEmail = string.IsNullOrWhiteSpace(currentUser?.Email)
+        ? "No email"
+        : currentUser.Email;
+}
+
+<ul id="slide-out" class="sidenav sidenav-fixed custom-sidenav">
+    <li>
+        <div class="user-view custom-user-view">
+            <div class="background blue-grey lighten-3"></div>
+
+            <a href="#user" class="avatar-wrap">
+                <img class="circle avatar-img"
+                     src="~/images/avatar.png"
+                     alt="User"
+                     onerror="this.src='https://i.pravatar.cc/120?img=12';" />
+            </a>
+
+            <a href="#role">
+                <span class="white-text name">@currentRole</span>
+            </a>
+
+            <a href="#email">
+                <span class="white-text email">@currentEmail</span>
+            </a>
+        </div>
+    </li>
+
+    @foreach (var menuItem in Model.MenuItems.OrderBy(x => x.Sequence))
+    {
+        if (menuItem.DisplayName == "Logout")
+        {
+            <li>
+                <a href="javascript:void(0);" id="mnuLogout" class="menu-link">
+                    <i class="material-icons menu-icon">@menuItem.MaterialIcon</i>
+                    <span class="menu-text">@menuItem.DisplayName</span>
+                </a>
+            </li>
+        }
+        else if (menuItem.DisplayName == "Reset Password")
+        {
+            <li>
+                <a href="javascript:void(0);" id="mnuResetPassword" class="menu-link">
+                    <i class="material-icons menu-icon">@menuItem.MaterialIcon</i>
+                    <span class="menu-text">@menuItem.DisplayName</span>
+                </a>
+            </li>
+        }
+        else if (menuItem.IsNested && menuItem.NestedItems != null && menuItem.NestedItems.Any())
+        {
+            <li>
+                <ul class="collapsible collapsible-accordion custom-collapsible">
+                    <li>
+                        <a class="collapsible-header menu-link">
+                            <i class="material-icons menu-icon">@menuItem.MaterialIcon</i>
+                            <span class="menu-text">@menuItem.DisplayName</span>
+                        </a>
+
+                        <div class="collapsible-body">
+                            <ul>
+                                @foreach (var child in menuItem.NestedItems.OrderBy(x => x.Sequence))
+                                {
+                                    if (child.DisplayName == "Reset Password")
+                                    {
+                                        <li>
+                                            <a href="javascript:void(0);" id="mnuResetPassword" class="menu-link child-link">
+                                                <i class="material-icons menu-icon">@child.MaterialIcon</i>
+                                                <span class="menu-text">@child.DisplayName</span>
+                                            </a>
+                                        </li>
+                                    }
+                                    else
+                                    {
+                                        <li>
+                                            <a href="@child.Link" class="menu-link child-link">
+                                                <i class="material-icons menu-icon">@child.MaterialIcon</i>
+                                                <span class="menu-text">@child.DisplayName</span>
+                                            </a>
+                                        </li>
+                                    }
+                                }
+                            </ul>
+                        </div>
+                    </li>
+                </ul>
+            </li>
+        }
+        else
+        {
+            <li>
+                <a href="@menuItem.Link" class="menu-link">
+                    <i class="material-icons menu-icon">@menuItem.MaterialIcon</i>
+                    <span class="menu-text">@menuItem.DisplayName</span>
+                </a>
+            </li>
+        }
+    }
+</ul>

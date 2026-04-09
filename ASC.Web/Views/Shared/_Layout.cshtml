@@ -1,21 +1,21 @@
 ﻿@{
     Layout = "_MasterLayout";
 }
-
+<link rel="stylesheet" href="~/css/styles.css" />
 <header>
     <nav class="white" role="navigation">
         <div class="nav-wrapper container">
-            <a id="logo-container" href="#" class="brand-logo logo-wrap">
+            <a id="logo-container" href="/Identity/Account/Login" class="brand-logo logo-wrap">
                 <img src="~/images/logo.png" alt="logo" />
             </a>
 
             <ul class="right hide-on-med-and-down">
-                <li><a href="#">Login</a></li>
+                <li><a href="/Identity/Account/Login">Login</a></li>
                 <li><a href="#">Contact</a></li>
             </ul>
 
             <ul id="nav-mobile" class="sidenav">
-                <li><a href="#">Login</a></li>
+                <li><a href="/Identity/Account/Login">Login</a></li>
                 <li><a href="#">Contact</a></li>
             </ul>
 
@@ -103,3 +103,4 @@
         </div>
     </div>
 </footer>
+@RenderSection("Scripts", required: false)

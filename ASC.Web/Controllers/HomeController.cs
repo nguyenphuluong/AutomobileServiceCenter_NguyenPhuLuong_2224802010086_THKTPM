@@ -5,7 +5,7 @@ using ASC.Utilities;
 
 namespace ASC.Web.Controllers
 {
-    public class HomeController : Controller
+    public class HomeController : AnonymousController
     {
         private readonly ApplicationSettings _appSettings;
 

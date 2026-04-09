@@ -1,43 +1,16 @@
-﻿using ASC.Web.Configuration;
-using ASC.Web.Data;
-using ASC.DataAccess;
 using ASC.DataAccess.Interfaces;
+using ASC.Web.Configuration;
+using ASC.Web.Data;
+using ASC.Web.Services;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
-    ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
-
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(connectionString));
-
-// nếu UnitOfWork / Repository dùng DbContext tổng quát thì cần dòng này
-builder.Services.AddScoped<DbContext, ApplicationDbContext>();
-
-builder.Services.AddIdentity<IdentityUser, IdentityRole>()
-    .AddEntityFrameworkStores<ApplicationDbContext>()
-    .AddDefaultTokenProviders();
-
-builder.Services.Configure<ApplicationSettings>(
-    builder.Configuration.GetSection("ApplicationSettings"));
-
-builder.Services.AddScoped<IIdentitySeed, IdentitySeed>();
-builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-
-builder.Services.AddDistributedMemoryCache();
-
-builder.Services.AddSession(options =>
-{
-    options.IdleTimeout = TimeSpan.FromMinutes(20);
-    options.Cookie.HttpOnly = true;
-    options.Cookie.IsEssential = true;
-});
-
-builder.Services.AddControllersWithViews();
+builder.Services
+    .AddConfig(builder.Configuration)
+    .AddDependencyGroup();
 
 var app = builder.Build();
 
@@ -51,6 +24,13 @@ using (var scope = app.Services.CreateScope())
         scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>(),
         scope.ServiceProvider.GetRequiredService<IOptions<ApplicationSettings>>()
     );
+}
+
+// tạo cache menu từ Navigation.json
+using (var scope = app.Services.CreateScope())
+{
+    var navigationCacheOperations = scope.ServiceProvider.GetRequiredService<INavigationCacheOperations>();
+    await navigationCacheOperations.CreateNavigationCacheAsync();
 }
 
 if (!app.Environment.IsDevelopment())
@@ -70,7 +50,13 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllerRoute(
+    name: "areas",
+    pattern: "{area:exists}/{controller=Dashboard}/{action=Dashboard}/{id?}");
+
+app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+
+app.MapRazorPages();
 
 app.Run();
