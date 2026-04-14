@@ -1,0 +1,156 @@
+﻿@model ASC.Web.Areas.Accounts.Models.CustomerViewModel
+
+@{
+    ViewData["Title"] = "Customers";
+    Layout = "~/Views/Shared/_SecureLayout.cshtml";
+}
+
+<div class="service-engineers-page">
+    <div class="section-card">
+        <h4 class="page-section-title">Users</h4>
+
+        <div class="section-card-body">
+            @if (Model.Customers != null && Model.Customers.Any())
+            {
+                <table id="tblCustomers" class="striped highlight engineer-table">
+                    <thead>
+                        <tr>
+                            <th>Email</th>
+                            <th>Is Active</th>
+                            <th class="action-col">Edit User</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var user in Model.Customers)
+                        {
+                            <tr>
+                                <td>@user.Email</td>
+                                <td>
+                                    @if (user.IsActive)
+                                    {
+                                        <i class="material-icons status-active">check</i>
+                                    }
+                                    else
+                                    {
+                                        <i class="material-icons status-deactive">close</i>
+                                    }
+                                </td>
+                                <td class="action-col">
+                                    <a href="javascript:void(0);"
+                                       class="edit-btn-icon edit-customer"
+                                       data-email="@user.Email"
+                                       data-active="@user.IsActive"
+                                       title="Edit">
+                                        <i class="material-icons">edit</i>
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+            else
+            {
+                <div class="card-panel blue-grey lighten-5">
+                    No customers found.
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="section-card">
+        <h4 class="page-section-title">Customer Details</h4>
+
+        <div class="section-card-body form-section">
+            <form asp-action="Customers" method="post" id="formUser">
+                <input type="hidden" asp-for="Registration.IsEdit" />
+                <input type="hidden" asp-for="Registration.Email" />
+
+                <div class="row">
+                    <div class="input-field col s12 m4">
+                        <input id="Input_Registration_Email" type="email" disabled />
+                        <label for="Input_Registration_Email">Email</label>
+                    </div>
+
+                    <div class="col s12 m4">
+                        <div class="inline-switch">
+                            <span>Is Active</span>
+                            <div class="switch">
+                                <label>
+                                    Off
+                                    <input asp-for="Registration.IsActive" type="checkbox" />
+                                    <span class="lever"></span>
+                                    On
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="input-field col s12 m4 right-align">
+                        <button class="waves-effect waves-light btn btn-flat-custom btnSubmit"
+                                type="submit"
+                                name="action">
+                            Save
+                            <i class="material-icons right">send</i>
+                        </button>
+
+                        <button class="waves-effect waves-light btn btn-reset-custom reset"
+                                type="button"
+                                name="action">
+                            Reset
+                        </button>
+                    </div>
+
+                    <div class="row col s12 right-align" asp-validation-summary="All"></div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        $(document).ready(function () {
+            var table = $('#tblCustomers').DataTable({
+                "pageLength": 3,
+                "lengthMenu": [[3, 5, 10, -1], [3, 5, 10, "All"]]
+            });
+
+            $('select[name="tblCustomers_length"]').css('width', '100px');
+            $('select[name="tblCustomers_length"]').formSelect();
+
+            $('.btnSubmit').attr('disabled', 'disabled');
+
+            $(document).on('click', '.reset', function () {
+                $('#formUser')[0].reset();
+                $('#Registration_Email').val('');
+                $('#Input_Registration_Email').val('');
+                $('#Registration_IsEdit').val('false');
+                $('.btnSubmit').attr('disabled', 'disabled');
+                M.updateTextFields();
+            });
+
+            if ($('#Registration_IsEdit').val() === "True" || $('#Registration_IsEdit').val() === "true") {
+                $('#Input_Registration_Email').attr('disabled', 'disabled');
+                $('.btnSubmit').removeAttr('disabled');
+                M.updateTextFields();
+            }
+
+            $(document).on('click', '.edit-customer', function () {
+                var email = $(this).data('email');
+                var isActive = $(this).data('active');
+
+                $('#Registration_IsEdit').val('true');
+                $('#Registration_Email').val(email);
+                $('#Input_Registration_Email').val(email).attr('disabled', 'disabled');
+                $('#Registration_IsActive').prop('checked',
+                    isActive === true || isActive === "True" || isActive === "true");
+
+                $('.btnSubmit').removeAttr('disabled');
+                M.updateTextFields();
+            });
+        });
+    </script>
+}

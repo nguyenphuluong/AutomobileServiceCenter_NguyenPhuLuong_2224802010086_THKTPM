@@ -1,0 +1,65 @@
+﻿@model ASC.Web.Areas.Accounts.Models.ProfileModel
+
+@{
+    ViewData["Title"] = "Profile";
+    Layout = "~/Views/Shared/_SecureLayout.cshtml";
+}
+
+<div class="profile-page">
+    <div class="profile-box">
+        <div class="profile-box-header">Profile</div>
+
+        <div class="profile-box-body">
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="card-panel green lighten-4 green-text text-darken-4 success-message">
+                    @TempData["SuccessMessage"]
+                </div>
+            }
+
+            <form asp-action="Profile" method="post" id="formProfile">
+                <div asp-validation-summary="All" class="validation-summary-errors"></div>
+
+                <div class="row">
+                    <div class="input-field col s12 m6">
+                        <input asp-for="UserName" id="Input_UserName" />
+                        <label asp-for="UserName"></label>
+                        <span asp-validation-for="UserName" class="text-danger"></span>
+                    </div>
+
+                    <div class="col s12 m6 right-align">
+                        <div class="profile-actions">
+                            <button class="waves-effect waves-light btn btn-flat-custom"
+                                    type="submit">
+                                Save
+                                <i class="material-icons right">send</i>
+                            </button>
+
+                            <button class="waves-effect waves-light btn btn-reset-custom reset"
+                                    type="button">
+                                Reset
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        $(document).ready(function () {
+            var originalUserName = $("#Input_UserName").val();
+
+            $(document).on("click", ".reset", function () {
+                $("#Input_UserName").val(originalUserName);
+                M.updateTextFields();
+            });
+
+            M.updateTextFields();
+        });
+    </script>
+}

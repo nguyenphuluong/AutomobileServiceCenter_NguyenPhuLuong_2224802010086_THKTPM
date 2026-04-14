@@ -3,17 +3,23 @@
 @inject IHttpContextAccessor UserHttpContext
 
 @{
-    var sessionUser = UserHttpContext.HttpContext?.Session.GetSession<CurrentUser>("CurrentUser");
     var claimUser = UserHttpContext.HttpContext?.User.GetCurrentUserDetails();
-    var currentUser = sessionUser ?? claimUser;
+    var sessionUser = UserHttpContext.HttpContext?.Session.GetSession<CurrentUser>("CurrentUser");
 
-    var currentRole = (currentUser?.Roles != null && currentUser.Roles.Length > 0)
-        ? currentUser.Roles[0]
-        : "User";
+    // Ưu tiên claim user vì sau khi đổi Profile + RefreshSignInAsync
+    // claim/cookie sẽ là dữ liệu mới nhất
+    var currentUser = claimUser ?? sessionUser;
 
-    var currentEmail = string.IsNullOrWhiteSpace(currentUser?.Email)
-        ? "No email"
-        : currentUser.Email;
+    var currentUserName =
+        !string.IsNullOrWhiteSpace(currentUser?.Name)
+            ? currentUser.Name
+            : !string.IsNullOrWhiteSpace(UserHttpContext.HttpContext?.User?.Identity?.Name)
+                ? UserHttpContext.HttpContext!.User.Identity!.Name!
+                : "User";
+
+    var currentEmail = !string.IsNullOrWhiteSpace(currentUser?.Email)
+        ? currentUser.Email
+        : "No email";
 }
 
 <ul id="slide-out" class="sidenav sidenav-fixed custom-sidenav">
@@ -28,8 +34,8 @@
                      onerror="this.src='https://i.pravatar.cc/120?img=12';" />
             </a>
 
-            <a href="#role">
-                <span class="white-text name">@currentRole</span>
+            <a href="#username">
+                <span class="white-text name">@currentUserName</span>
             </a>
 
             <a href="#email">

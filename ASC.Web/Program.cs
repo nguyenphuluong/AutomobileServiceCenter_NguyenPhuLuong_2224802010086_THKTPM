@@ -7,14 +7,14 @@ using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// Đăng ký services
 builder.Services
     .AddConfig(builder.Configuration)
     .AddDependencyGroup();
 
 var app = builder.Build();
 
-// seed dữ liệu từ appsettings.json lên database
+// Seed dữ liệu từ appsettings.json lên database
 using (var scope = app.Services.CreateScope())
 {
     var identitySeed = scope.ServiceProvider.GetRequiredService<IIdentitySeed>();
@@ -26,7 +26,7 @@ using (var scope = app.Services.CreateScope())
     );
 }
 
-// tạo cache menu từ Navigation.json
+// Tạo cache menu từ Navigation.json
 using (var scope = app.Services.CreateScope())
 {
     var navigationCacheOperations = scope.ServiceProvider.GetRequiredService<INavigationCacheOperations>();

@@ -1,0 +1,238 @@
+﻿@model ASC.Web.Areas.Accounts.Models.ServiceEngineerViewModel
+
+@{
+    ViewData["Title"] = "Service Engineers";
+    Layout = "~/Views/Shared/_SecureLayout.cshtml";
+}
+
+<div class="service-engineers-page">
+    <div class="section-card">
+        <h4 class="page-section-title">Users</h4>
+
+        <div class="section-card-body">
+            @if (Model.ServiceEngineers != null && Model.ServiceEngineers.Any())
+            {
+                <table id="tblServiceEngineers" class="striped highlight engineer-table">
+                    <thead>
+                        <tr>
+                            <th>Email</th>
+                            <th>Name</th>
+                            <th>Is Active</th>
+                            <th class="action-col">Edit User</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.ServiceEngineers)
+                        {
+                            var displayName = !string.IsNullOrWhiteSpace(item.Fullname)
+                            ? item.Fullname
+                            : item.Username;
+
+                            <tr>
+                                <td>@item.Email</td>
+                                <td>@displayName</td>
+                                <td>
+                                    @if (item.Active)
+                                    {
+                                        <i class="material-icons status-active">check</i>
+                                    }
+                                    else
+                                    {
+                                        <i class="material-icons status-deactive">close</i>
+                                    }
+                                </td>
+                                <td class="action-col">
+                                    <a href="javascript:void(0);"
+                                       class="edit-btn-icon edit-user"
+                                       data-id="@item.Id"
+                                       data-email="@item.Email"
+                                       data-username="@item.Username"
+                                       data-fullname="@item.Fullname"
+                                       data-active="@item.Active"
+                                       title="Edit">
+                                        <i class="material-icons">edit</i>
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+            else
+            {
+                <div class="card-panel blue-grey lighten-5">
+                    No Service Engineers found, please add a Service Engineer to system.
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="section-card">
+        <h4 class="page-section-title">Service Engineer Details</h4>
+
+        <div class="section-card-body form-section">
+            <form asp-action="ServiceEngineers" method="post" id="formServiceEngineer">
+                <input asp-for="Registration.Id" type="hidden" />
+                <input asp-for="Registration.IsEdit" type="hidden" />
+
+                @* Giữ Fullname để không vỡ model/controller hiện tại *@
+                <input asp-for="Registration.Fullname" type="hidden" />
+
+                <div asp-validation-summary="All" class="validation-summary-errors padding-bottom-15px"></div>
+
+                <div class="row">
+                    <div class="input-field col s12 m4">
+                        <input asp-for="Registration.Email" id="Input_Registration_Email" />
+                        <label asp-for="Registration.Email"></label>
+                        <span asp-validation-for="Registration.Email" class="text-danger"></span>
+                    </div>
+
+                    <div class="input-field col s12 m4">
+                        <input asp-for="Registration.Username" id="Input_Registration_Username" />
+                        <label asp-for="Registration.Username"></label>
+                        <span asp-validation-for="Registration.Username" class="text-danger"></span>
+                    </div>
+
+                    <div class="input-field col s12 m4">
+                        <input asp-for="Registration.Password" id="Input_Registration_Password" type="password" />
+                        <label asp-for="Registration.Password"></label>
+                        <span asp-validation-for="Registration.Password" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="input-field col s12 m4">
+                        <input asp-for="Registration.ConfirmPassword" id="Input_Registration_ConfirmPassword" type="password" />
+                        <label asp-for="Registration.ConfirmPassword"></label>
+                        <span asp-validation-for="Registration.ConfirmPassword" class="text-danger"></span>
+                    </div>
+
+                    <div class="col s12 m4">
+                        <div class="inline-switch">
+                            <span>Is Active</span>
+                            <div class="switch">
+                                <label>
+                                    Off
+                                    <input asp-for="Registration.Active" id="Registration_Active" type="checkbox" />
+                                    <span class="lever"></span>
+                                    On
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="input-field col s12 m4 right-align">
+                        <button id="btnSubmit"
+                                class="waves-effect waves-light btn btn-flat-custom"
+                                type="submit">
+                            <span id="btnSubmitText">Create</span>
+                            <i class="material-icons right">send</i>
+                        </button>
+
+                        <button id="btnReset"
+                                class="waves-effect waves-light btn btn-reset-custom"
+                                type="button">
+                            Reset
+                        </button>
+                    </div>
+                </div>
+
+                <div class="form-note">
+                    When edit mode is enabled, password fields can be left empty if not changing password.
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        $(document).ready(function () {
+            var table = $("#tblServiceEngineers").DataTable({
+                pageLength: 3,
+                lengthMenu: [[3, 5, 10, -1], [3, 5, 10, "All"]],
+                ordering: true,
+                searching: true,
+                info: true,
+                lengthChange: true
+            });
+
+            $('select[name="tblServiceEngineers_length"]').css('width', '100px');
+            if ($('select[name="tblServiceEngineers_length"]').length) {
+                $('select[name="tblServiceEngineers_length"]').formSelect();
+            }
+
+            function syncFullname() {
+                var currentFullname = $("#Registration_Fullname").val();
+                var username = $("#Input_Registration_Username").val();
+
+                if (!currentFullname || currentFullname.trim() === "") {
+                    $("#Registration_Fullname").val(username);
+                }
+            }
+
+            function setCreateMode() {
+                $("#Registration_Id").val("");
+                $("#Registration_IsEdit").val("false");
+                $("#Input_Registration_Email").val("");
+                $("#Input_Registration_Username").val("");
+                $("#Registration_Fullname").val("");
+                $("#Input_Registration_Password").val("");
+                $("#Input_Registration_ConfirmPassword").val("");
+                $("#Registration_Active").prop("checked", true);
+                $("#btnSubmitText").text("Create");
+
+                M.updateTextFields();
+            }
+
+            function setEditMode(data) {
+                $("#Registration_Id").val(data.id);
+                $("#Registration_IsEdit").val("true");
+                $("#Input_Registration_Email").val(data.email);
+                $("#Input_Registration_Username").val(data.username);
+                $("#Registration_Fullname").val(data.fullname);
+                $("#Input_Registration_Password").val("");
+                $("#Input_Registration_ConfirmPassword").val("");
+                $("#Registration_Active").prop("checked", data.active === true || data.active === "True" || data.active === "true");
+                $("#btnSubmitText").text("Save");
+
+                M.updateTextFields();
+            }
+
+            $(document).on("click", ".edit-user", function () {
+                setEditMode({
+                    id: $(this).data("id"),
+                    email: $(this).data("email"),
+                    username: $(this).data("username"),
+                    fullname: $(this).data("fullname"),
+                    active: $(this).data("active")
+                });
+            });
+
+            $("#btnReset").click(function () {
+                setCreateMode();
+            });
+
+            $("#Input_Registration_Username").on("keyup blur change", function () {
+                var isEdit = $("#Registration_IsEdit").val() === "true" || $("#Registration_IsEdit").val() === "True";
+                if (!isEdit) {
+                    $("#Registration_Fullname").val($(this).val());
+                }
+            });
+
+            $("#formServiceEngineer").on("submit", function () {
+                syncFullname();
+            });
+
+            if ($("#Registration_IsEdit").val() === "true" || $("#Registration_IsEdit").val() === "True") {
+                $("#btnSubmitText").text("Save");
+            } else {
+                $("#btnSubmitText").text("Create");
+            }
+
+            M.updateTextFields();
+        });
+    </script>
+}

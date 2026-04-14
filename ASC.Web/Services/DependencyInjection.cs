@@ -11,28 +11,39 @@ namespace ASC.Web.Services
     {
         public static IServiceCollection AddConfig(this IServiceCollection services, IConfiguration config)
         {
-            var connectionString = config.GetConnectionString("DefaultConnection")
-                ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+            var connectionString = config.GetConnectionString("DefaultConnection");
+            if (string.IsNullOrEmpty(connectionString))
+                throw new Exception("Connection string not found.");
 
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(connectionString));
 
-            services.AddScoped<DbContext, ApplicationDbContext>();
+            services.Configure<ApplicationSettings>(config.GetSection("AppSettings"));
 
-            services.Configure<ApplicationSettings>(
-                config.GetSection("ApplicationSettings"));
+            services.AddDefaultIdentity<IdentityUser>(options =>
+            {
+                options.SignIn.RequireConfirmedAccount = false;
+            })
+            .AddRoles<IdentityRole>()
+            .AddEntityFrameworkStores<ApplicationDbContext>();
+
+            services.AddAuthentication()
+                .AddGoogle(options =>
+                {
+                    IConfigurationSection googleAuthSection = config.GetSection("Authentication:Google");
+                    options.ClientId = googleAuthSection["ClientId"] ?? "";
+                    options.ClientSecret = googleAuthSection["ClientSecret"] ?? "";
+                });
+
+            services.AddControllersWithViews();
+            services.AddRazorPages();
 
             return services;
         }
 
         public static IServiceCollection AddDependencyGroup(this IServiceCollection services)
         {
-            services.AddIdentity<IdentityUser, IdentityRole>(options =>
-            {
-                options.SignIn.RequireConfirmedAccount = false;
-            })
-            .AddEntityFrameworkStores<ApplicationDbContext>()
-            .AddDefaultTokenProviders();
+            // KHÔNG add Identity lần 2 ở đây nữa
 
             services.AddScoped<IIdentitySeed, IdentitySeed>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
@@ -46,12 +57,11 @@ namespace ASC.Web.Services
                 options.Cookie.IsEssential = true;
             });
 
-            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+            services.AddHttpContextAccessor();
             services.AddSingleton<INavigationCacheOperations, NavigationCacheOperations>();
 
-            services.AddControllersWithViews();
-            services.AddRazorPages();
             services.AddTransient<IEmailSender, AuthMessageSender>();
+
             return services;
         }
     }

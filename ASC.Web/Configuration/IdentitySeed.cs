@@ -11,70 +11,56 @@ namespace ASC.Web.Data
             RoleManager<IdentityRole> roleManager,
             IOptions<ApplicationSettings> options)
         {
-            // tạo tất cả role trong appsettings
-            var roles = options.Value.Roles.Split(new char[] { ',' });
+            var rolesText = options.Value?.Roles;
+
+            if (string.IsNullOrWhiteSpace(rolesText))
+                throw new Exception("AppSettings:Roles chưa được cấu hình trong appsettings.json");
+
+            var roles = rolesText
+                .Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 
             foreach (var role in roles)
             {
-                try
+                if (!await roleManager.RoleExistsAsync(role))
                 {
-                    if (!roleManager.RoleExistsAsync(role).Result)
+                    await roleManager.CreateAsync(new IdentityRole
                     {
-                        IdentityRole identityRole = new IdentityRole
-                        {
-                            Name = role
-                        };
-
-                        IdentityResult roleResult = await roleManager.CreateAsync(identityRole);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine(ex);
+                        Name = role
+                    });
                 }
             }
 
-            // tạo admin nếu chưa có
-            if (userManager.FindByEmailAsync(options.Value.AdminEmail).Result == null)
+            // admin
+            if (await userManager.FindByEmailAsync(options.Value.AdminEmail) == null)
             {
-                IdentityUser user = new IdentityUser
+                var admin = new IdentityUser
                 {
                     UserName = options.Value.AdminEmail,
                     Email = options.Value.AdminEmail,
-                    LockoutEnabled = false
+                    EmailConfirmed = true
                 };
 
-                IdentityResult result = await userManager.CreateAsync(
-                    user,
-                    options.Value.AdminPassword
-                );
-
+                var result = await userManager.CreateAsync(admin, options.Value.AdminPassword);
                 if (result.Succeeded)
                 {
-                    await userManager.AddClaimAsync(user, new System.Security.Claims.Claim("Name", options.Value.AdminName));
-                    await userManager.AddToRoleAsync(user, "Admin");
+                    await userManager.AddToRoleAsync(admin, "Admin");
                 }
             }
 
-            // tạo engineer nếu chưa có
-            if (userManager.FindByEmailAsync(options.Value.EngineerEmail).Result == null)
+            // engineer
+            if (await userManager.FindByEmailAsync(options.Value.EngineerEmail) == null)
             {
-                IdentityUser user = new IdentityUser
+                var engineer = new IdentityUser
                 {
                     UserName = options.Value.EngineerEmail,
                     Email = options.Value.EngineerEmail,
-                    LockoutEnabled = false
+                    EmailConfirmed = true
                 };
 
-                IdentityResult result = await userManager.CreateAsync(
-                    user,
-                    options.Value.EngineerPassword
-                );
-
+                var result = await userManager.CreateAsync(engineer, options.Value.EngineerPassword);
                 if (result.Succeeded)
                 {
-                    await userManager.AddClaimAsync(user, new System.Security.Claims.Claim("Name", options.Value.EngineerName));
-                    await userManager.AddToRoleAsync(user, "Engineer");
+                    await userManager.AddToRoleAsync(engineer, "Engineer");
                 }
             }
         }

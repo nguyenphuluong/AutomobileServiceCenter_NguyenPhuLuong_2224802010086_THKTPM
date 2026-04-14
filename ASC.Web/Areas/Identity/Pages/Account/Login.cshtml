@@ -8,6 +8,7 @@
 <div class="container">
     <div class="row">
         <div class="col s12 m5 offset-m4">
+
             <form asp-route-returnUrl="@ViewData["ReturnUrl"]" method="post">
                 <div asp-validation-summary="All" class="text-danger"></div>
 
@@ -43,10 +44,44 @@
                     </button>
                 </div>
 
-                <div class="row center">
+                <div class="row center" style="margin-top:15px;">
                     <a href="/Identity/Account/ForgotPassword">Forgot your password?</a>
                 </div>
             </form>
+
+            <div class="row center" style="margin-top:25px;">
+                <h6>Or login with</h6>
+            </div>
+
+            @if ((Model.ExternalLogins?.Count ?? 0) == 0)
+            {
+                <div class="row center">
+                    <p>No external login services configured.</p>
+                </div>
+            }
+            else
+            {
+                <form id="external-account"
+                      asp-page="./ExternalLogin"
+                      asp-route-returnUrl="@ViewData["ReturnUrl"]"
+                      method="post"
+                      class="form-horizontal">
+
+                    <div class="row center">
+                        @foreach (var provider in Model.ExternalLogins!)
+                        {
+                            <button type="submit"
+                                    class="btn red darken-1 waves-effect waves-light"
+                                    name="provider"
+                                    value="@provider.Name"
+                                    title="Log in using your @provider.DisplayName account">
+                                @provider.DisplayName
+                            </button>
+                        }
+                    </div>
+                </form>
+            }
+
         </div>
     </div>
 </div>

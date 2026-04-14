@@ -178,3 +178,208 @@ main {
 footer {
     margin-top: auto;
 }
+/* =========================
+   SERVICE ENGINEERS PAGE
+   ========================= */
+
+.page-section-title {
+    background-color: #90A4AE;
+    color: #fff;
+    padding: 14px 18px;
+    font-size: 24px;
+    font-weight: 500;
+    margin: 0;
+}
+
+.section-card {
+    border: 1px solid #e0e0e0;
+    background: #fff;
+    margin-bottom: 24px;
+}
+
+.section-card-body {
+    padding: 18px;
+}
+
+.dataTables_wrapper {
+    font-size: 14px;
+}
+
+    .dataTables_wrapper .dataTables_length,
+    .dataTables_wrapper .dataTables_filter {
+        margin-bottom: 12px;
+    }
+
+    .dataTables_wrapper .dataTables_info,
+    .dataTables_wrapper .dataTables_paginate {
+        margin-top: 12px;
+    }
+
+.engineer-table thead th {
+    font-weight: 600;
+}
+
+.status-active {
+    color: #43A047;
+    font-weight: 600;
+}
+
+.status-deactive {
+    color: #E53935;
+    font-weight: 600;
+}
+
+.action-col {
+    width: 90px;
+    text-align: center;
+}
+
+.form-section {
+    padding-top: 8px;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 18px;
+}
+
+.form-note {
+    margin-top: 12px;
+    color: #616161;
+    font-size: 13px;
+}
+
+.inline-switch {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 10px;
+}
+
+    .inline-switch label {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+input[type=text]:focus,
+input[type=password]:focus,
+input[type=email]:focus {
+    border-bottom: 1px solid #26a69a !important;
+    box-shadow: 0 1px 0 0 #26a69a !important;
+}
+
+.btn-flat-custom {
+    background-color: #26a69a;
+    color: #fff;
+}
+
+    .btn-flat-custom:hover {
+        background-color: #219187;
+        color: #fff;
+    }
+
+.btn-reset-custom {
+    background-color: #ef5350;
+    color: #fff;
+}
+
+    .btn-reset-custom:hover {
+        background-color: #e53935;
+        color: #fff;
+    }
+
+.edit-btn-icon {
+    cursor: pointer;
+    color: #212121;
+}
+
+    .edit-btn-icon:hover {
+        color: #26a69a;
+    }
+
+.service-engineers-page .row {
+    margin-bottom: 0;
+}
+/* =========================
+   PROFILE PAGE
+   ========================= */
+
+main.secureLayout {
+    flex: 0 0 auto !important;
+}
+
+.profile-page {
+    padding: 14px;
+}
+
+.profile-box {
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+    margin-bottom: 18px;
+}
+
+.profile-box-header {
+    background-color: #90A4AE;
+    color: #fff;
+    padding: 14px 16px;
+    font-size: 18px;
+    font-weight: 500;
+}
+
+.profile-box-body {
+    padding: 14px 16px 18px 16px;
+}
+
+.profile-page .row {
+    margin-bottom: 0;
+}
+
+.profile-page .input-field {
+    margin-top: 8px;
+    margin-bottom: 8px;
+}
+
+    .profile-page .input-field input[type=text],
+    .profile-page .input-field input[type=email] {
+        margin-bottom: 4px;
+    }
+
+.profile-actions {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.profile-page .btn-flat-custom {
+    background-color: #26a69a;
+    color: #fff;
+}
+
+    .profile-page .btn-flat-custom:hover {
+        background-color: #219187;
+        color: #fff;
+    }
+
+.profile-page .btn-reset-custom {
+    background-color: #ef5350;
+    color: #fff;
+}
+
+    .profile-page .btn-reset-custom:hover {
+        background-color: #e53935;
+        color: #fff;
+    }
+
+.profile-page .validation-summary-errors {
+    color: #e53935;
+    margin-bottom: 10px;
+}
+
+.profile-page .success-message {
+    margin-bottom: 12px;
+}
