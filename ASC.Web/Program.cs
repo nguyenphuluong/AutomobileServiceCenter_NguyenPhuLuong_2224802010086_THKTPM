@@ -33,7 +33,12 @@ using (var scope = app.Services.CreateScope())
     await navigationCacheOperations.CreateNavigationCacheAsync();
 }
 
-if (!app.Environment.IsDevelopment())
+// Bật lỗi chi tiết khi chạy Development
+if (app.Environment.IsDevelopment())
+{
+    app.UseDeveloperExceptionPage();
+}
+else
 {
     app.UseExceptionHandler("/Home/Error");
     app.UseHsts();

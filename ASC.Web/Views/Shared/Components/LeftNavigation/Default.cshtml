@@ -20,6 +20,8 @@
     var currentEmail = !string.IsNullOrWhiteSpace(currentUser?.Email)
         ? currentUser.Email
         : "No email";
+
+    var isAdmin = UserHttpContext.HttpContext?.User?.IsInRole("Admin") ?? false;
 }
 
 <ul id="slide-out" class="sidenav sidenav-fixed custom-sidenav">
@@ -113,4 +115,6 @@
             </li>
         }
     }
+
+    
 </ul>

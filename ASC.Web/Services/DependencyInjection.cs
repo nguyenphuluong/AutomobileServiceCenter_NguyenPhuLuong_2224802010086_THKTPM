@@ -1,5 +1,8 @@
-﻿using ASC.DataAccess;
+﻿using ASC.Business;
+using ASC.Business.Interfaces;
+using ASC.DataAccess;
 using ASC.DataAccess.Interfaces;
+using ASC.Web.Areas.Configuration.Models;
 using ASC.Web.Configuration;
 using ASC.Web.Data;
 using Microsoft.AspNetCore.Identity;
@@ -43,13 +46,24 @@ namespace ASC.Web.Services
 
         public static IServiceCollection AddDependencyGroup(this IServiceCollection services)
         {
-            // KHÔNG add Identity lần 2 ở đây nữa
-
+            // Seed / identity services
             services.AddScoped<IIdentitySeed, IdentitySeed>();
+
+            // DbContext mapping cho UnitOfWork đang nhận DbContext
+            services.AddScoped<DbContext>(sp => sp.GetRequiredService<ApplicationDbContext>());
+
+            // Data access / business
             services.AddScoped<IUnitOfWork, UnitOfWork>();
+            services.AddScoped<IMasterDataOperations, MasterDataOperations>();
 
+            // AutoMapper
+            services.AddAutoMapper(cfg =>
+            {
+                cfg.AddProfile<MappingProfile>();
+            });
+
+            // Cache / session
             services.AddDistributedMemoryCache();
-
             services.AddSession(options =>
             {
                 options.IdleTimeout = TimeSpan.FromMinutes(20);
@@ -58,8 +72,11 @@ namespace ASC.Web.Services
             });
 
             services.AddHttpContextAccessor();
-            services.AddSingleton<INavigationCacheOperations, NavigationCacheOperations>();
 
+            // Navigation
+            services.AddScoped<INavigationCacheOperations, NavigationCacheOperations>();
+
+            // Email
             services.AddTransient<IEmailSender, AuthMessageSender>();
 
             return services;
