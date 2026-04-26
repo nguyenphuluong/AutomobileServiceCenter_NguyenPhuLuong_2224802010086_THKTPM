@@ -437,6 +437,8 @@
                     success: function (message) {
                         $(".progress").addClass("hide");
 
+                        console.log("UPLOAD RESPONSE:", message);
+
                         var isSuccess = message && (message.success === true || message.Success === true);
                         var text = "";
 
@@ -463,22 +465,22 @@
                         }
 
                         $(".divErrors").removeClass("hide");
-                        $(".errors").html(text || "Upload không thành công nhưng server không trả lỗi rõ.");
+                        $(".errors").html(text || "Upload không thành công.");
+                        alert(text || "Upload không thành công.");
                     },
 
                     error: function (xhr) {
                         $(".progress").addClass("hide");
                         $(".divErrors").removeClass("hide");
 
-                        var errorText = "Lỗi upload.";
+                        console.log("UPLOAD ERROR:", xhr);
 
-                        if (xhr.responseJSON) {
-                            errorText = xhr.responseJSON.text || xhr.responseJSON.Text || JSON.stringify(xhr.responseJSON);
-                        } else if (xhr.responseText) {
-                            errorText = xhr.responseText;
-                        }
+                        var errorText =
+                            "Lỗi upload.\n" +
+                            "Status: " + xhr.status + "\n" +
+                            "Response: " + (xhr.responseText || "Không có responseText");
 
-                        $(".errors").html(errorText);
+                        $(".errors").html(errorText.replace(/\n/g, "<br>"));
                         alert(errorText);
                     }
                 });

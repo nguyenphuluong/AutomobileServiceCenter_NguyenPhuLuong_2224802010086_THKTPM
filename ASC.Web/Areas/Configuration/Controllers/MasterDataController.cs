@@ -405,14 +405,14 @@ namespace ASC.Web.Areas.Configuration.Controllers
             }
         }
         [HttpPost]
-        [ValidateAntiForgeryToken]
+        [IgnoreAntiforgeryToken]
         public async Task<IActionResult> UploadExcel()
         {
             try
             {
                 var files = Request.Form.Files;
 
-                if (!files.Any())
+                if (files == null || !files.Any())
                 {
                     return Json(new { success = false, text = "Chưa chọn file upload." });
                 }
@@ -433,7 +433,7 @@ namespace ASC.Web.Areas.Configuration.Controllers
 
                 var masterData = await ParseMasterDataExcel(excelFile);
 
-                if (!masterData.Any())
+                if (masterData == null || !masterData.Any())
                 {
                     return Json(new { success = false, text = "File không có dữ liệu hợp lệ." });
                 }
@@ -445,7 +445,7 @@ namespace ASC.Web.Areas.Configuration.Controllers
                     return Json(new
                     {
                         success = false,
-                        text = "Upload thất bại. Kiểm tra lại MasterKey/PartitionKey hoặc dữ liệu bị trùng."
+                        text = "Upload thất bại. Kiểm tra lại dữ liệu trong file Excel."
                     });
                 }
 
@@ -453,8 +453,7 @@ namespace ASC.Web.Areas.Configuration.Controllers
             }
             catch (Exception ex)
             {
-                var message = ex.GetBaseException().Message;
-                return Json(new { success = false, text = message });
+                return Json(new { success = false, text = ex.GetBaseException().Message });
             }
         }
 
