@@ -4,7 +4,6 @@
 }
 
 <div class="master-page">
-    <!-- LIST -->
     <div class="master-card z-depth-1">
         <div class="master-card-header">
             <h5>Master Values</h5>
@@ -13,8 +12,15 @@
         <div class="master-card-body">
             <div class="row top-tools-row">
                 <div class="input-field col s12 m4">
-                    <select id="ddlMasterKeys" asp-items="@(new SelectList(ViewBag.MasterKeys, "RowKey", "PartitionKey"))">
-                        <option value="">--Select--</option>
+                    <select id="ddlMasterKeys">
+                        <option value="">--All--</option>
+                        @if (ViewBag.MasterKeys != null)
+                        {
+                            foreach (var key in ViewBag.MasterKeys)
+                            {
+                                <option value="@key.PartitionKey">@key.PartitionKey</option>
+                            }
+                        }
                     </select>
                     <label>Partition Key</label>
                 </div>
@@ -40,19 +46,18 @@
         </div>
     </div>
 
-    <!-- DETAILS -->
     <div class="master-card z-depth-1">
         <div class="master-card-header">
             <h5>Master Value Details</h5>
         </div>
 
         <div class="master-card-body">
-            <form asp-controller="MasterData" asp-action="MasterValues" method="post" id="formMasterValue">
+            <form id="formMasterValue">
                 @Html.AntiForgeryToken()
 
-                <input type="hidden" asp-for="IsEdit" />
-                <input type="hidden" asp-for="MasterValueInContext.RowKey" />
-                <input type="hidden" asp-for="MasterValueInContext.PartitionKey" />
+                <input type="hidden" id="IsEdit" value="False" />
+                <input type="hidden" id="MasterValue_RowKey" />
+                <input type="hidden" id="MasterValue_PartitionKey" />
 
                 <div class="row form-row">
                     <div class="input-field col s12 m4">
@@ -60,19 +65,30 @@
                         <label for="Input_MasterValue_RowKey" class="active">RowKey</label>
                     </div>
 
-                    <div class="input-field col s12 m4">
-                        <select id="Select_MasterValueInContext_PartitionKey"
-                                asp-for="MasterValueInContext.PartitionKey"
-                                asp-items="@(new SelectList(ViewBag.MasterKeys, "RowKey", "PartitionKey"))"
-                                required="required">
+                    <!-- CREATE MODE: chọn Partition Key bằng dropdown -->
+                    <div class="input-field col s12 m4" id="CreatePartitionWrapper">
+                        <select id="Create_MasterValue_PartitionKey">
                             <option value="">--Select--</option>
+                            @if (ViewBag.MasterKeys != null)
+                            {
+                                foreach (var key in ViewBag.MasterKeys)
+                                {
+                                    <option value="@key.PartitionKey">@key.PartitionKey</option>
+                                }
+                            }
                         </select>
                         <label>Partition Key</label>
                     </div>
 
+                    <!-- EDIT MODE: hiện Partition Key bằng input readonly -->
+                    <div class="input-field col s12 m4 hide" id="EditPartitionWrapper">
+                        <input id="Edit_MasterValue_PartitionKey" type="text" readonly />
+                        <label for="Edit_MasterValue_PartitionKey" class="active">Partition Key</label>
+                    </div>
+
                     <div class="input-field col s12 m4">
-                        <input asp-for="MasterValueInContext.Name" id="MasterValueInContext_Name" />
-                        <label asp-for="MasterValueInContext.Name">Name</label>
+                        <input id="MasterValue_Name" class="validate" required />
+                        <label for="MasterValue_Name" class="active">Name</label>
                     </div>
                 </div>
 
@@ -81,7 +97,7 @@
                         <span class="switch-text">Is Active</span>
                         <div class="switch">
                             <label>
-                                <input asp-for="MasterValueInContext.IsActive" type="checkbox" />
+                                <input id="MasterValue_IsActive" type="checkbox" checked />
                                 <span class="lever"></span>
                             </label>
                         </div>
@@ -98,14 +114,13 @@
                         </button>
                     </div>
 
-                    <div class="col s12 validation-wrap" asp-validation-summary="All"></div>
+                    <div class="col s12 validation-wrap"></div>
                 </div>
             </form>
         </div>
     </div>
 </div>
 
-<!-- Modal Upload -->
 <div id="modal1" class="modal modal-fixed-footer">
     <div class="modal-content">
         <h4>Upload Excel</h4>
@@ -129,11 +144,13 @@
             <div class="file-field input-field">
                 <div class="btn teal">
                     <span>File</span>
-                    <input type="file" id="files">
+                    <input type="file" id="files" accept=".xlsx,.xls" />
                 </div>
+
                 <div class="file-path-wrapper">
                     <input class="file-path validate" type="text">
                 </div>
+
                 <div class="input-field row right">
                     <button class="btn waves-effect waves-light btnUpload" type="button">
                         Upload
@@ -148,133 +165,247 @@
 @section Scripts {
     <script>
         $(document).ready(function () {
-            var token = $('input[type=hidden][name=__RequestVerificationToken]', document).val();
-            $.ajaxSetup({
-                cache: false,
-                headers: { 'RequestVerificationToken': token }
-            });
+            var token = $('input[name="__RequestVerificationToken"]').first().val();
+
+            function normalizeBool(value) {
+                return value === true || value === "true" || value === "True";
+            }
+
+            function getCurrentFilterKey() {
+                var selectedValue = $('#ddlMasterKeys').val();
+                return selectedValue ? selectedValue.trim() : "";
+            }
 
             var table = $('#tblMasterValues').DataTable({
                 ajax: {
-                    url: '@Url.Action("MasterValuesByKey", "MasterData")',
-                    type: 'GET'
+                    url: '@Url.Action("MasterValuesByKey", "MasterData", new { area = "Configuration" })',
+                    type: 'GET',
+                    dataSrc: 'data',
+                    error: function (xhr) {
+                        console.log("DATATABLE ERROR:", xhr);
+                    }
                 },
                 pageLength: 3,
                 lengthMenu: [[3, 5, 10, -1], [3, 5, 10, 'All']],
                 columns: [
-                    { data: 'RowKey' },
-                    { data: 'PartitionKey' },
-                    { data: 'Name' },
-                    { data: 'IsActive' },
-                    { data: 'Actions' }
-                ],
-                aoColumnDefs: [
                     {
-                        aTargets: [3],
-                        mData: "IsActive",
-                        mRender: function (data) {
-                            if (data === true) {
+                        data: null,
+                        render: function (data) {
+                            return data.rowKey || data.RowKey || '';
+                        }
+                    },
+                    {
+                        data: null,
+                        render: function (data) {
+                            return data.partitionKey || data.PartitionKey || '';
+                        }
+                    },
+                    {
+                        data: null,
+                        render: function (data) {
+                            return data.name || data.Name || '';
+                        }
+                    },
+                    {
+                        data: null,
+                        render: function (data) {
+                            var isActive = data.isActive;
+
+                            if (isActive === undefined) {
+                                isActive = data.IsActive;
+                            }
+
+                            if (normalizeBool(isActive)) {
                                 return '<i class="material-icons status-active">check</i>';
                             }
+
                             return '<i class="material-icons status-inactive">close</i>';
                         }
                     },
                     {
-                        aTargets: [4],
-                        mData: "Actions",
-                        mRender: function () {
+                        data: null,
+                        orderable: false,
+                        render: function () {
                             return '<a href="javascript:void(0)" class="edit-master-value"><i class="material-icons edit-icon">edit</i></a>';
                         }
                     }
                 ]
             });
 
+            function reloadTable() {
+                var selectedKey = getCurrentFilterKey();
+
+                table.ajax.url(
+                    '@Url.Action("MasterValuesByKey", "MasterData", new { area = "Configuration" })'
+                    + '?key=' + encodeURIComponent(selectedKey)
+                );
+
+                table.ajax.reload(null, false);
+            }
+
+            function setCreateMode() {
+                $('#IsEdit').val('False');
+
+                $('#CreatePartitionWrapper').removeClass('hide');
+                $('#EditPartitionWrapper').addClass('hide');
+
+                $('#Create_MasterValue_PartitionKey').formSelect('destroy');
+                $('#Create_MasterValue_PartitionKey').removeAttr('disabled');
+                $('#Create_MasterValue_PartitionKey').val('');
+                $('#Create_MasterValue_PartitionKey').formSelect();
+
+                $('.btnSubmit').html('Create <i class="material-icons right">send</i>');
+            }
+
+            function setEditMode() {
+                $('#IsEdit').val('True');
+
+                $('#CreatePartitionWrapper').addClass('hide');
+                $('#EditPartitionWrapper').removeClass('hide');
+
+                $('#Create_MasterValue_PartitionKey').formSelect('destroy');
+                $('#Create_MasterValue_PartitionKey').attr('disabled', 'disabled');
+                $('#Create_MasterValue_PartitionKey').formSelect();
+
+                $('.btnSubmit').html('Save <i class="material-icons right">send</i>');
+            }
+
+            function resetMasterValueForm() {
+                $('#MasterValue_RowKey').val('');
+                $('#MasterValue_PartitionKey').val('');
+                $('#Input_MasterValue_RowKey').val('');
+                $('#Edit_MasterValue_PartitionKey').val('');
+                $('#MasterValue_Name').val('');
+                $('#MasterValue_IsActive').prop('checked', true);
+                $('.validation-wrap').html('');
+
+                setCreateMode();
+                M.updateTextFields();
+            }
+
             $('#tblMasterValues').css("width", "100%");
+
             $('select').formSelect();
             $('select[name="tblMasterValues_length"]').formSelect();
-            $("select[required]").css({
-                display: "block",
-                position: 'absolute',
-                visibility: 'hidden'
-            });
+
+            $('#MasterValue_IsActive').prop('checked', true);
+            M.updateTextFields();
 
             $(document).on('change', '#ddlMasterKeys', function () {
-                var selectedKey = $('#ddlMasterKeys option:selected').text();
-                table.ajax.url('@Url.Action("MasterValuesByKey", "MasterData")' + '?key=' + selectedKey);
-                table.ajax.reload();
+                reloadTable();
             });
 
             $(document).on("click", ".reset", function () {
-                $('#formMasterValue')[0].reset();
-                $('#IsEdit').val('False');
-
-                $('#MasterValueInContext_RowKey').val('');
-                $('#MasterValueInContext_PartitionKey').val('');
-                $('#Input_MasterValue_RowKey').val('');
-                $('#MasterValueInContext_Name').val('');
-                $('#MasterValueInContext_IsActive').prop('checked', false);
-
-                $('#Select_MasterValueInContext_PartitionKey').formSelect('destroy');
-                $('#Select_MasterValueInContext_PartitionKey').removeAttr('disabled');
-                $('#Select_MasterValueInContext_PartitionKey').val('');
-                $('#Select_MasterValueInContext_PartitionKey').formSelect();
-
-                $('.btnSubmit').html('Create <i class="material-icons right">send</i>');
-                $('.validation-summary-valid').find('ul').html('');
-                M.updateTextFields();
+                resetMasterValueForm();
             });
 
             $(document).on('click', '.edit-master-value', function () {
-                var user = $('#tblMasterValues').DataTable().row($(this).parents('tr')).data();
+                var tr = $(this).closest('tr');
 
-                $('#IsEdit').val('True');
+                if (tr.hasClass('child')) {
+                    tr = tr.prev();
+                }
 
-                $('#MasterValueInContext_RowKey').val(user["RowKey"]);
-                $('#Input_MasterValue_RowKey').val(user["RowKey"]);
+                var rowData = table.row(tr).data();
 
-                $('#MasterValueInContext_PartitionKey').val(user["PartitionKey"]);
+                if (!rowData) {
+                    alert("Không lấy được dữ liệu dòng đang chọn.");
+                    return;
+                }
 
-                $('#Select_MasterValueInContext_PartitionKey').formSelect('destroy');
-                $('#Select_MasterValueInContext_PartitionKey option').prop('selected', false);
-                $('#Select_MasterValueInContext_PartitionKey option:contains(' + user['PartitionKey'] + ')').prop('selected', true);
-                $('#Select_MasterValueInContext_PartitionKey').attr('disabled', 'disabled');
-                $('#Select_MasterValueInContext_PartitionKey').formSelect();
+                var rowKey = rowData.rowKey || rowData.RowKey;
+                var partitionKey = rowData.partitionKey || rowData.PartitionKey;
+                var name = rowData.name || rowData.Name;
+                var isActive = rowData.isActive;
 
-                $('.select-wrapper').removeClass('valid');
+                if (isActive === undefined) {
+                    isActive = rowData.IsActive;
+                }
 
-                $('#MasterValueInContext_Name').val(user["Name"]);
-                $('#MasterValueInContext_Name').addClass('valid');
+                console.log("EDIT MASTER VALUE:", {
+                    rowKey: rowKey,
+                    partitionKey: partitionKey,
+                    name: name,
+                    isActive: isActive
+                });
 
-                $('#MasterValueInContext_IsActive').prop('checked', user["IsActive"] === true);
+                $('#MasterValue_RowKey').val(rowKey);
+                $('#MasterValue_PartitionKey').val(partitionKey);
+                $('#Input_MasterValue_RowKey').val(rowKey);
+                $('#Edit_MasterValue_PartitionKey').val(partitionKey);
+                $('#MasterValue_Name').val(name);
+                $('#MasterValue_IsActive').prop('checked', normalizeBool(isActive));
 
-                $('.btnSubmit').html('Save <i class="material-icons right">send</i>');
+                setEditMode();
                 M.updateTextFields();
             });
 
             $(document).on('click', '.btnSubmit', function () {
-                var form = $("#formMasterValue");
+                var isEdit = $('#IsEdit').val() === 'True';
 
-                if ($(form).valid()) {
-                    var masterData = new Object();
-                    masterData.Name = $('#MasterValueInContext_Name').val();
-                    masterData.PartitionKey = $('#Select_MasterValueInContext_PartitionKey option:selected').text();
-                    masterData.IsActive = $('#MasterValueInContext_IsActive').is(':checked');
+                var rowKey = $('#MasterValue_RowKey').val();
+                var partitionKey = "";
 
-                    if ($('#IsEdit').val() === 'True') {
-                        masterData.RowKey = $('#MasterValueInContext_RowKey').val();
-                    }
-
-                    $.post('@Url.Action("MasterValues", "MasterData")',
-                        { masterValue: masterData, isEdit: $('#IsEdit').val() },
-                        function () {
-                            table.ajax.url('@Url.Action("MasterValuesByKey", "MasterData")' + '?key=' + $('#ddlMasterKeys option:selected').text());
-                            table.ajax.reload();
-                        }
-                    );
-
-                    $('.reset').click();
-                    $('.select-wrapper').removeClass('valid');
+                if (isEdit) {
+                    partitionKey = $('#MasterValue_PartitionKey').val();
+                } else {
+                    partitionKey = $('#Create_MasterValue_PartitionKey').val();
                 }
+
+                var name = $('#MasterValue_Name').val().trim();
+                var isActive = $('#MasterValue_IsActive').is(':checked');
+
+                if (!partitionKey) {
+                    alert("Vui lòng chọn Partition Key.");
+                    return;
+                }
+
+                if (!name) {
+                    alert("Name không được để trống.");
+                    return;
+                }
+
+                var postData = {
+                    __RequestVerificationToken: token,
+                    isEdit: isEdit,
+                    rowKey: rowKey,
+                    partitionKey: partitionKey,
+                    name: name,
+                    isActive: isActive
+                };
+
+                console.log("POST MASTER VALUE:", postData);
+
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("SaveMasterValue", "MasterData", new { area = "Configuration" })',
+                    data: postData,
+                    success: function (response) {
+                        console.log("SAVE MASTER VALUE RESPONSE:", response);
+
+                        var ok = response && (response.success === true || response.Success === true);
+
+                        if (!ok) {
+                            alert((response && (response.text || response.Text)) || "Lưu Master Value thất bại.");
+                            return;
+                        }
+
+                        alert((response && (response.text || response.Text)) || "Lưu Master Value thành công.");
+
+                        reloadTable();
+                        resetMasterValueForm();
+                    },
+                    error: function (xhr) {
+                        console.log("SAVE MASTER VALUE ERROR:", xhr);
+
+                        var errorText =
+                            "Lỗi server khi lưu Master Value.\n" +
+                            "Status: " + xhr.status + "\n" +
+                            "Response: " + (xhr.responseText || "Không có responseText");
+
+                        alert(errorText);
+                    }
+                });
             });
 
             $('.modal').modal();
@@ -282,35 +413,78 @@
             $(document).on('click', '.btnUpload', function () {
                 var fileUpload = $("#files").get(0);
                 var files = fileUpload.files;
+
+                if (!files || files.length === 0) {
+                    $(".divErrors").removeClass("hide");
+                    $(".errors").html("Chưa chọn file Excel.");
+                    return;
+                }
+
                 var data = new FormData();
+                data.append("file", files[0]);
 
-                $.each(files, function (i) {
-                    data.append(files[i].name, files[i]);
-                });
-
+                $(".divErrors").addClass("hide");
+                $(".errors").html("");
                 $(".progress").removeClass("hide");
 
                 $.ajax({
                     type: "POST",
-                    url: "/Configuration/MasterData/UploadExcel",
+                    url: '@Url.Action("UploadExcel", "MasterData", new { area = "Configuration" })',
                     contentType: false,
                     processData: false,
                     data: data,
+
                     success: function (message) {
                         $(".progress").addClass("hide");
 
-                        if (message.Success) {
-                            window.location.reload();
+                        var isSuccess = message && (message.success === true || message.Success === true);
+                        var text = "";
+
+                        if (message) {
+                            text = message.text || message.Text || JSON.stringify(message);
                         }
 
-                        if (message.Error) {
-                            $(".divErrors").removeClass("hide");
-                            $(".errors").html(message.Text);
+                        if (isSuccess) {
+                            alert(text || "Upload thành công.");
+
+                            reloadTable();
+
+                            var modalElement = document.getElementById('modal1');
+                            var modalInstance = M.Modal.getInstance(modalElement);
+
+                            if (modalInstance) {
+                                modalInstance.close();
+                            }
+
+                            $("#files").val("");
+                            $(".file-path").val("");
+
+                            return;
                         }
+
+                        $(".divErrors").removeClass("hide");
+                        $(".errors").html(text || "Upload không thành công nhưng server không trả lỗi rõ.");
                     },
-                    error: function () { }
+
+                    error: function (xhr) {
+                        $(".progress").addClass("hide");
+                        $(".divErrors").removeClass("hide");
+
+                        var errorText = "Lỗi upload.";
+
+                        if (xhr.responseJSON) {
+                            errorText = xhr.responseJSON.text || xhr.responseJSON.Text || JSON.stringify(xhr.responseJSON);
+                        } else if (xhr.responseText) {
+                            errorText = xhr.responseText;
+                        }
+
+                        $(".errors").html(errorText);
+                        alert(errorText);
+                    }
                 });
             });
+
+            resetMasterValueForm();
         });
     </script>
 }
