@@ -1,10 +1,45 @@
-﻿@{
-    Layout = "_SecureLayout";
-}
+﻿@model ASC.Web.Areas.ServiceRequests.Models.DashboardViewModel
+
 @{
-    ViewData["Title"] = "Dashboard";
+    Layout = "_SecureLayout";
+    ViewData["Title"] = "Service Requests Dashboard";
 }
 
-<h2>Dashboard</h2>
-<p>Welcome to Service Requests Dashboard</p>
-<p>@ViewBag.ApplicationTitle</p>
+<div class="row"></div>
+
+@await Html.PartialAsync(
+"_ServiceRequestGrid",
+    Model.ServiceRequests,
+    new ViewDataDictionary(ViewData)
+    {
+        { "SectionName", "Service Requests" },
+        { "Id", "tblServiceRequests" },
+        { "IsAudit", false }
+    }
+)
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            if ($.fn.DataTable) {
+                var table = $('#tblServiceRequests').DataTable({
+                    pageLength: 3,
+                    lengthMenu: [[3, 5, 10, -1], [3, 5, 10, 'All']],
+                    sorting: [],
+                    columnDefs: [
+                        { visible: false, targets: [0, 1] },
+                        { width: "20%", targets: [5] }
+                    ]
+                });
+
+                $('.tblServiceRequests').css("width", "100%");
+
+                if ($('select[name="tblServiceRequests_length"]').length > 0) {
+                    $('select[name="tblServiceRequests_length"]').material_select
+                        ? $('select[name="tblServiceRequests_length"]').material_select()
+                        : $('select[name="tblServiceRequests_length"]').formSelect();
+                }
+            }
+        });
+    </script>
+}

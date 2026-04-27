@@ -1,5 +1,5 @@
 ﻿using ASC.Model.BaseTypes;
-
+using System.Linq.Expressions;
 namespace ASC.DataAccess.Interfaces
 {
     public interface IRepository<T> where T : BaseEntity
@@ -11,5 +11,8 @@ namespace ASC.DataAccess.Interfaces
         Task<T?> FindAsync(string partitionKey, string rowKey);
         Task<IEnumerable<T>> FindAllByPartitionKeyAsync(string partitionKey);
         Task<IEnumerable<T>> FindAllAsync();
+        Task<IEnumerable<T>> FindAllByQuery(Expression<Func<T, bool>> filter);
+
+        Task<IEnumerable<T>> FindAllInAuditByQuery(Expression<Func<T, bool>> filter);
     }
 }

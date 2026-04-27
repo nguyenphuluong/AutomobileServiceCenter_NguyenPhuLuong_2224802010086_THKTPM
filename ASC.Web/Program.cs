@@ -63,5 +63,12 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.MapRazorPages();
+// Create MasterData Cache
+using (var scope = app.Services.CreateScope())
+{
+    var masterDataCacheOperations = scope.ServiceProvider
+        .GetRequiredService<IMasterDataCacheOperations>();
 
+    await masterDataCacheOperations.CreateMasterDataCacheAsync();
+}
 app.Run();

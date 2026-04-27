@@ -1,0 +1,163 @@
+﻿@model ASC.Web.Areas.ServiceRequests.Models.NewServiceRequestViewModel
+@using Microsoft.AspNetCore.Mvc.Rendering
+
+@{
+    Layout = "_SecureLayout";
+    ViewData["Title"] = "New Service Request";
+}
+
+<style>
+    .service-request-card {
+        background: #ffffff;
+        border: 1px solid #e0e0e0;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.20);
+        margin-top: 20px;
+        margin-bottom: 20px;
+    }
+
+    .service-request-header {
+        background-color: #78909C;
+        color: white;
+        padding: 10px 14px;
+        font-size: 16px;
+        font-weight: 500;
+        line-height: 1.4;
+    }
+
+    .service-request-body {
+        padding: 8px 14px 24px 14px;
+        min-height: 220px;
+    }
+
+    .service-request-body .row {
+        margin-bottom: 5px;
+    }
+
+    .service-request-body label {
+        font-size: 12px;
+    }
+
+    .btnSubmit {
+        background-color: #26a69a;
+    }
+
+    .btnSubmit:hover {
+        background-color: #2bbbad;
+    }
+
+    .validation-right {
+        margin-top: 12px;
+        font-size: 13px;
+        text-align: right;
+        line-height: 1.35;
+    }
+
+    .validation-right ul {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+
+    .validation-right li {
+        margin-bottom: 2px;
+    }
+
+    .material-icons.right {
+        margin-left: 8px;
+    }
+</style>
+
+<div class="row padding-left-20px padding-right-20px">
+    <div class="col s12">
+        <div class="service-request-card">
+
+            <div class="service-request-header">
+                New Service Request
+            </div>
+
+            <div class="service-request-body">
+                <form asp-area="ServiceRequests"
+                      asp-controller="ServiceRequest"
+                      asp-action="ServiceRequest"
+                      method="post"
+                      class="col s12">
+
+                    @Html.AntiForgeryToken()
+
+                    <div class="row">
+                        <div class="input-field col s12 m4">
+                            <select asp-for="VehicleName"
+                                    asp-items="@(new SelectList(ViewBag.VehicleNames, "RowKey", "Name"))"
+                                    required="required">
+                                <option value="" disabled selected>Please select one</option>
+                            </select>
+                            <label asp-for="VehicleName"></label>
+                        </div>
+
+                        <div class="input-field col s12 m4">
+                            <select asp-for="VehicleType"
+                                    asp-items="@(new SelectList(ViewBag.VehicleTypes, "RowKey", "Name"))"
+                                    required="required">
+                                <option value="" disabled selected>Please select one</option>
+                            </select>
+                            <label asp-for="VehicleType"></label>
+                        </div>
+
+                        <div class="input-field col s12 m4">
+                            <input asp-for="RequestedDate"
+                                   type="text"
+                                   class="datepicker validate"
+                                   required="required" />
+                            <label asp-for="RequestedDate" class="active"></label>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="input-field col s12 m8">
+                            <textarea asp-for="RequestedServices"
+                                      class="materialize-textarea validate"
+                                      required="required"></textarea>
+                            <label asp-for="RequestedServices"></label>
+                        </div>
+
+                        <div class="input-field col s12 m4 right-align" style="padding-top: 35px;">
+                            <button class="btn waves-effect waves-light btnSubmit"
+                                    type="submit"
+                                    name="action">
+                                Create
+                                <i class="material-icons right">send</i>
+                            </button>
+
+                            <div asp-validation-summary="All"
+                                 class="red-text text-darken-1 validation-right">
+                            </div>
+                        </div>
+                    </div>
+
+                </form>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        $(document).ready(function () {
+            $('.datepicker').datepicker({
+                format: 'dd/mm/yyyy',
+                autoClose: true
+            });
+
+            $('select').formSelect();
+
+            $('select[required]').css({
+                display: 'block',
+                position: 'absolute',
+                visibility: 'hidden'
+            });
+        });
+    </script>
+}

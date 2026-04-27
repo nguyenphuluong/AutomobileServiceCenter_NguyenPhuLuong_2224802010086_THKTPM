@@ -3,6 +3,7 @@ using ASC.Business.Interfaces;
 using ASC.DataAccess;
 using ASC.DataAccess.Interfaces;
 using ASC.Web.Areas.Configuration.Models;
+using ASC.Web.Areas.ServiceRequests.Models;
 using ASC.Web.Configuration;
 using ASC.Web.Data;
 using Microsoft.AspNetCore.Identity;
@@ -15,8 +16,11 @@ namespace ASC.Web.Services
         public static IServiceCollection AddConfig(this IServiceCollection services, IConfiguration config)
         {
             var connectionString = config.GetConnectionString("DefaultConnection");
+
             if (string.IsNullOrEmpty(connectionString))
+            {
                 throw new Exception("Connection string not found.");
+            }
 
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(connectionString));
@@ -38,6 +42,13 @@ namespace ASC.Web.Services
                     options.ClientSecret = googleAuthSection["ClientSecret"] ?? "";
                 });
 
+            
+            services.AddStackExchangeRedisCache(options =>
+            {
+                options.Configuration = config["RedisCacheSettings:ConnectionString"] ?? "localhost:6379";
+                options.InstanceName = config["RedisCacheSettings:InstanceName"] ?? "ASCInstance";
+            });
+
             services.AddControllersWithViews();
             services.AddRazorPages();
 
@@ -55,15 +66,16 @@ namespace ASC.Web.Services
             // Data access / business
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IMasterDataOperations, MasterDataOperations>();
-
-            // AutoMapper
+            services.AddScoped<IMasterDataCacheOperations, MasterDataCacheOperations>();
+            services.AddScoped<IServiceRequestOperations, ServiceRequestOperations>();
             services.AddAutoMapper(cfg =>
             {
                 cfg.AddProfile<MappingProfile>();
+                cfg.AddProfile<ServiceRequestMappingProfile>();
             });
 
-            // Cache / session
-            services.AddDistributedMemoryCache();
+            
+
             services.AddSession(options =>
             {
                 options.IdleTimeout = TimeSpan.FromMinutes(20);

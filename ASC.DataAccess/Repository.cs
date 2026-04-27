@@ -1,13 +1,25 @@
 ﻿using ASC.DataAccess.Interfaces;
 using ASC.Model.BaseTypes;
 using Microsoft.EntityFrameworkCore;
-
+using System.Linq.Expressions;
 namespace ASC.DataAccess
 {
     public class Repository<T> : IRepository<T> where T : BaseEntity, new()
     {
         private readonly DbContext _dbContext;
+        public async Task<IEnumerable<T>> FindAllByQuery(Expression<Func<T, bool>> filter)
+        {
+            return await _dbContext.Set<T>()
+                .Where(filter)
+                .ToListAsync();
+        }
 
+        public async Task<IEnumerable<T>> FindAllInAuditByQuery(Expression<Func<T, bool>> filter)
+        {
+            return await _dbContext.Set<T>()
+                .Where(filter)
+                .ToListAsync();
+        }
         public Repository(DbContext dbContext)
         {
             _dbContext = dbContext;
