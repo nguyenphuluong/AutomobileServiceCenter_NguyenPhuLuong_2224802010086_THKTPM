@@ -2,7 +2,7 @@
 
 [![Watch the demo](https://img.youtube.com/vi/qK_Etj5-hT0/hqdefault.jpg)](https://youtu.be/qK_Etj5-hT0)
 
-## Demo lab 7_8
+## Demo Lab 7_8
 
 [![Watch the demo](https://img.youtube.com/vi/5q1xB64rGA4/hqdefault.jpg)](https://youtu.be/5q1xB64rGA4)
 
@@ -14,4 +14,6 @@
 
 [![Watch the demo](https://img.youtube.com/vi/8HJLjfB33vU/hqdefault.jpg)](https://youtu.be/8HJLjfB33vU)
 
+## Demo Lab 11
 
+[![Watch the demo](https://img.youtube.com/vi/LQR81JPcfds/hqdefault.jpg)](https://youtu.be/LQR81JPcfds)
