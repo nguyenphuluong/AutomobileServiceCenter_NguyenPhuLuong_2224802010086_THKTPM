@@ -10,6 +10,8 @@ namespace ASC.Web.Data
         public virtual DbSet<MasterDataValue> MasterDataValues { get; set; }
         public virtual DbSet<ServiceRequest> ServiceRequests { get; set; }
         public DbSet<Product> Products { get; set; }
+        public DbSet<ServiceRequestMessage> ServiceRequestMessages { get; set; }
+
 
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)

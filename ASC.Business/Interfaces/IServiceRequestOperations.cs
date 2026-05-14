@@ -18,5 +18,14 @@ namespace ASC.Business.Interfaces
             List<string>? status = null,
             string email = "",
             string serviceEngineerEmail = "");
+
+        // CHAT
+        Task AddMessageAsync(ServiceRequestMessage message);
+
+        Task<List<ServiceRequestMessage>> GetMessagesByRequestIdAsync(
+            string requestId);
+
+        // DASHBOARD
+        Task<List<ServiceRequest>> GetAllServiceRequestsAsync();
     }
 }

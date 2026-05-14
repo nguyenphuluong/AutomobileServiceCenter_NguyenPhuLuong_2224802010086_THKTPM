@@ -1,0 +1,188 @@
+﻿@model ASC.Model.Models.ServiceRequest
+
+@{
+    Layout = "_SecureLayout";
+    ViewData["Title"] = "Service Request Detail";
+}
+
+<style>
+    .chat-box {
+        height: 400px;
+        overflow-y: auto;
+        border: 1px solid #ddd;
+        padding: 15px;
+        margin-bottom: 15px;
+        background: #fafafa;
+        border-radius: 6px;
+    }
+
+    .chat-message {
+        margin-bottom: 12px;
+        padding: 10px;
+        background: white;
+        border-radius: 5px;
+        border-left: 4px solid #26a69a;
+    }
+
+    .chat-user {
+        font-weight: bold;
+        color: #26a69a;
+    }
+
+    .detail-card {
+        margin-top: 20px;
+    }
+
+    .request-info p {
+        margin: 8px 0;
+        font-size: 15px;
+    }
+</style>
+
+<div class="row padding-left-20px padding-right-20px">
+    <div class="col s12">
+        <div class="card detail-card">
+            <div class="card-content">
+
+                <span class="card-title">
+                    Service Request Detail
+                </span>
+
+                <div class="request-info">
+                    <p><b>Vehicle Name:</b> @Model.VehicleName</p>
+                    <p><b>Vehicle Type:</b> @Model.VehicleType</p>
+                    <p><b>Requested Services:</b> @Model.RequestedServices</p>
+                    <p><b>Status:</b> @Model.Status</p>
+                    <p><b>Requested Date:</b> @(Model.RequestedDate?.ToString("dd/MM/yyyy"))</p>
+                </div>
+
+                <hr />
+
+                <h6>Chat</h6>
+
+                <input type="hidden"
+                       id="serviceRequestId"
+                       value="@Model.RowKey" />
+
+                <div id="messagesList" class="chat-box"></div>
+
+                <div class="row">
+                    <div class="input-field col s10">
+                        <input type="text" id="messageInput" />
+                        <label for="messageInput">Enter message</label>
+                    </div>
+
+                    <div class="input-field col s2">
+                        <button id="sendButton"
+                                class="btn waves-effect waves-light"
+                                style="width:100%;">
+                            Send
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+
+    <script>
+        const serviceRequestId = document.getElementById("serviceRequestId").value;
+        const messagesList = document.getElementById("messagesList");
+        const messageInput = document.getElementById("messageInput");
+        const sendButton = document.getElementById("sendButton");
+
+        function appendMessage(user, message) {
+            const div = document.createElement("div");
+            div.classList.add("chat-message");
+
+            div.innerHTML =
+                `<span class="chat-user">${user}</span><br/>${message}`;
+
+            messagesList.appendChild(div);
+            messagesList.scrollTop = messagesList.scrollHeight;
+        }
+
+        function loadMessages() {
+            fetch(`/ServiceRequests/ServiceRequest/GetMessages?requestId=${encodeURIComponent(serviceRequestId)}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error("Load messages failed");
+                    }
+
+                    return response.json();
+                })
+                .then(data => {
+                    messagesList.innerHTML = "";
+
+                    data.forEach(item => {
+                        appendMessage(item.userName, item.message);
+                    });
+                })
+                .catch(error => {
+                    console.error(error);
+                });
+        }
+
+        const connection =
+            new signalR.HubConnectionBuilder()
+                .withUrl("/serviceMessageHub")
+                .build();
+
+        connection.on("ReceiveMessage", function (user, message) {
+            appendMessage(user, message);
+        });
+
+        connection.start()
+            .then(function () {
+                return connection.invoke("JoinServiceRequest", serviceRequestId);
+            })
+            .then(function () {
+                loadMessages();
+            })
+            .catch(function (err) {
+                console.error(err.toString());
+            });
+
+        sendButton.addEventListener("click", function () {
+            const message = messageInput.value;
+
+            if (message.trim() === "") {
+                return;
+            }
+
+            fetch("/ServiceRequests/ServiceRequest/SendMessage", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    requestId: serviceRequestId,
+                    message: message
+                })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("Send message failed");
+                }
+
+                messageInput.value = "";
+            })
+            .catch(error => {
+                console.error(error);
+                alert("Gửi tin nhắn thất bại. Bấm F12 > Console để xem lỗi.");
+            });
+        });
+
+        messageInput.addEventListener("keypress", function (e) {
+            if (e.key === "Enter") {
+                e.preventDefault();
+                sendButton.click();
+            }
+        });
+    </script>
+}
